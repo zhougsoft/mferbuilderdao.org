@@ -56,29 +56,27 @@ export default function Hero() {
     })
   }
 
-  console.log(tokenInfo)
-
   return (
-    <div className='flex flex-col relative z-20 bg-skin-fill sm:flex-row items-center sm:h-[80vh] sm:max-h-[600px] pt-10'>
-      <div className='sm:w-1/2 mx-4 flex flex-col min-h-[400px] sm:min-h-auto justify-baseline items-end sm:pr-12 h-full relative'>
+    <div className="flex flex-col relative z-20 bg-skin-fill sm:flex-row items-center sm:h-[80vh] sm:max-h-[600px] pt-10">
+      <div className="sm:w-1/2 mx-4 flex flex-col min-h-[400px] sm:min-h-auto justify-baseline items-end sm:pr-12 h-full relative">
         {tokenInfo && (
           <Image
             src={tokenInfo.image}
             onLoad={() => setImageLoaded(true)}
             height={450}
             width={450}
-            alt='logo'
+            alt="logo"
             className={`rounded-md relative z-20 ${
               imageLoaded ? 'shadow-lg visible' : 'invisible'
             }`}
           />
         )}
-        <div className='absolute top-0 right-0 w-[450px] h-[450px] hidden sm:flex items-center justify-around sm:pr-12'>
-          <Image src={'/spinner.svg'} alt='spinner' width={30} height={30} />
+        <div className="absolute top-0 right-0 w-[450px] h-[450px] hidden sm:flex items-center justify-around sm:pr-12">
+          <Image src={'/spinner.svg'} alt="spinner" width={30} height={30} />
         </div>
       </div>
-      <div className='px-4 w-screen sm:w-auto min-h-64 sm:h-full flex flex-col justify-stretch items-stretch mt-6 sm:mt-0'>
-        <div className='flex items-center mb-4'>
+      <div className="px-4 w-screen sm:w-auto min-h-64 sm:h-full flex flex-col justify-stretch items-stretch mt-6 sm:mt-0">
+        <div className="flex items-center mb-4">
           <button
             onClick={handlePageBack}
             className={`flex items-center ${
@@ -109,7 +107,7 @@ export default function Hero() {
           </button>
         </div>
 
-        <div className='text-4xl sm:text-6xl font-heading text-skin-base font-semibold'>
+        <div className="text-4xl sm:text-6xl font-heading text-skin-base font-semibold">
           {tokenInfo ? `mfbldr ${tokenInfo.name?.split(' ')[1]}` : '---'}
         </div>
 
@@ -150,29 +148,29 @@ const EndedAuction = ({
   })
 
   return (
-    <div className='grid grid-cols-2 gap-0 sm:gap-12 mt-10 sm:w-96 pb-8 sm:pb-0'>
-      <div className='border-r mr-8 sm:mr-0 border-skin-stroke'>
-        <div className='text-lg text-skin-muted'>{'Winning Bid'}</div>
+    <div className="grid grid-cols-2 gap-0 sm:gap-12 mt-10 sm:w-96 pb-8 sm:pb-0">
+      <div className="border-r mr-8 sm:mr-0 border-skin-stroke">
+        <div className="text-lg text-skin-muted">{'Winning Bid'}</div>
         {auctionData ? (
-          <div className='text-2xl font-semibold sm:text-3xl text-skin-base mt-2'>
+          <div className="text-2xl font-semibold sm:text-3xl text-skin-base mt-2">
             Ξ {utils.formatEther(auctionData.amount || '0')}
           </div>
         ) : (
-          <div className='text-2xl font-semibold sm:text-3xl text-skin-base mt-2'>
+          <div className="text-2xl font-semibold sm:text-3xl text-skin-base mt-2">
             n/a
           </div>
         )}
       </div>
-      <div className='sm:w-64'>
-        <div className='text-lg text-skin-muted'>{'Held by'}</div>
+      <div className="sm:w-64">
+        <div className="text-lg text-skin-muted">{'Held by'}</div>
 
-        <div className='flex items-center mt-2'>
+        <div className="flex items-center mt-2">
           <UserAvatar
             diameter={32}
-            className='w-8 h-8 rounded-full mr-2'
+            className="w-8 h-8 rounded-full mr-2"
             address={owner || ethers.constants.AddressZero}
           />
-          <div className='text-xl font-semibold sm:text-3xl text-skin-base'>
+          <div className="text-xl font-semibold sm:text-3xl text-skin-base">
             {ensName || shortenAddress(owner || ethers.constants.AddressZero)}
           </div>
         </div>
@@ -194,23 +192,23 @@ const CurrentAuction = ({
 
   return (
     <Fragment>
-      <div className='grid grid-cols-2 gap-12 mt-10 sm:w-96'>
-        <div className='border-r border-skin-stroke'>
-          <div className='text-lg text-skin-muted'>
+      <div className="grid grid-cols-2 gap-12 mt-10 sm:w-96">
+        <div className="border-r border-skin-stroke">
+          <div className="text-lg text-skin-muted">
             {theme.strings.currentBid || 'Current Bid'}
           </div>
           {auctionInfo && (
-            <div className='text-2xl font-semibold sm:text-3xl text-skin-base mt-2'>
+            <div className="text-2xl font-semibold sm:text-3xl text-skin-base mt-2">
               Ξ {utils.formatEther(auctionInfo.highestBid || '0')}
             </div>
           )}
         </div>
-        <div className='sm:w-64'>
-          <div className='text-lg text-skin-muted'>
+        <div className="sm:w-64">
+          <div className="text-lg text-skin-muted">
             {theme.strings.auctionEndsIn || 'Auction ends in'}
           </div>
           {auctionInfo && (
-            <div className='text-2xl font-semibold sm:text-3xl text-skin-base mt-2'>
+            <div className="text-2xl font-semibold sm:text-3xl text-skin-base mt-2">
               <CountdownDisplay to={auctionInfo.endTime || '0'} />
             </div>
           )}

@@ -11,7 +11,7 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "api.zora.co",
-        port: "",
+        // port: "",
         pathname: "/renderer/**",
       },
     ],
