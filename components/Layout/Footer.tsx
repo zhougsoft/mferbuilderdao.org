@@ -1,5 +1,5 @@
 import { useTheme } from "@/hooks/useTheme";
-import NavigationItemComponent from "./NavigationItem";
+import NavigationItemComponent from "../NavigationItem";
 
 export default function Footer() {
   const [theme] = useTheme();

@@ -1,23 +1,25 @@
-import { useDAOAddresses, useGetAllProposals } from 'hooks/fetch'
-import { TOKEN_CONTRACT } from 'constants/addresses'
-import Image from 'next/image'
+import { Fragment, useState } from 'react'
 import { useRouter } from 'next/router'
-import Layout from '@/components/Layout'
-import { getProposalName } from '@/utils/getProposalName'
-import ProposalStatus from '@/components/ProposalStatus'
 import Link from 'next/link'
-import { ArrowLeftIcon } from '@heroicons/react/20/solid'
+import Image from 'next/image'
 import { useEnsName } from 'wagmi'
-import { shortenAddress } from '@/utils/shortenAddress'
-import { getProposalDescription } from '@/utils/getProposalDescription'
 import sanitizeHtml from 'sanitize-html'
+
+import { TOKEN_CONTRACT } from 'constants/addresses'
+import { Proposal } from '@/services/nouns-builder/governor'
+import { useTokenBalance } from 'hooks/fetch/useTokenBalance'
+import { useDAOAddresses, useGetAllProposals } from 'hooks/fetch'
+import { shortenAddress } from '@/utils/shortenAddress'
+import { getProposalName } from '@/utils/getProposalName'
+import { getProposalDescription } from '@/utils/getProposalDescription'
+
+import Layout from '@/components/Layout'
 import ModalWrapper from '@/components/ModalWrapper'
 import VoteModal from '@/components/VoteModal'
-import { Fragment, useState } from 'react'
-import { useTokenBalance } from '@/hooks/fetch/useTokenBalance'
-import { Proposal } from '@/services/nouns-builder/governor'
+import ProposalStatus from '@/components/ProposalStatus'
+import { ArrowLeftIcon } from '@heroicons/react/20/solid'
 
-export default function ProposalComponent() {
+export default function ProposalPage() {
   const { data: addresses } = useDAOAddresses({
     tokenContract: TOKEN_CONTRACT,
   })
@@ -26,14 +28,14 @@ export default function ProposalComponent() {
   })
 
   const {
-    query: { proposalid },
+    query: { proposalId },
   } = useRouter()
 
   const proposalNumber = proposals
-    ? proposals.length - proposals.findIndex(x => x.proposalId === proposalid)
+    ? proposals.length - proposals.findIndex(x => x.proposalId === proposalId)
     : 0
 
-  const proposal = proposals?.find(x => x.proposalId === proposalid)
+  const proposal = proposals?.find(x => x.proposalId === proposalId)
   const isActive = proposal?.state === 1
 
   const { data: ensName } = useEnsName({

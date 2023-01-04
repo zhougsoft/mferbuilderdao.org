@@ -5,12 +5,12 @@ import {
   useTreasuryBalance,
   useTheme,
 } from "hooks";
-import NavigationItemsComponent from "./NavigationItem";
+import NavigationItemsComponent from "../NavigationItem";
 import Link from "next/link";
 import { ETHERSCAN_BASEURL } from "constants/urls";
-import CustomConnectButton from "./CustomConnectButton";
+import CustomConnectButton from "../CustomConnectButton";
 import { Bars3Icon } from "@heroicons/react/20/solid";
-import MobileMenu from "./MobileMenu";
+import MobileMenu from "../MobileMenu";
 import { Fragment, useState } from "react";
 import { TOKEN_CONTRACT } from "constants/addresses";
 import { formatTreasuryBalance } from "@/utils/formatTreasuryBalance";

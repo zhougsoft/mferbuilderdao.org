@@ -1,22 +1,54 @@
-import Layout from '@/components/Layout'
-import { Proposal } from '@/services/nouns-builder/governor'
-import { TOKEN_CONTRACT } from 'constants/addresses'
+import type { GetStaticPropsResult } from 'next'
 import Link from 'next/link'
-import { useDAOAddresses, useGetAllProposals, useTreasuryBalance } from 'hooks'
-import { getProposalName } from '@/utils/getProposalName'
-import ProposalStatus from '@/components/ProposalStatus'
 import { promises as fs } from 'fs'
 import path from 'path'
-import { GetStaticPropsResult, InferGetStaticPropsType } from 'next'
 import { serialize } from 'next-mdx-remote/serialize'
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
+
+import { TOKEN_CONTRACT } from 'constants/addresses'
+import { Proposal } from '@/services/nouns-builder/governor'
+import { useDAOAddresses, useGetAllProposals, useTreasuryBalance } from 'hooks'
+import { getProposalName } from '@/utils/getProposalName'
 import { formatTreasuryBalance } from '@/utils/formatTreasuryBalance'
 
-export const getStaticProps = async (): Promise<
-  GetStaticPropsResult<{
-    descriptionSource: MDXRemoteSerializeResult<Record<string, unknown>>
-  }>
-> => {
+import Layout from '@/components/Layout'
+import ProposalStatus from '@/components/ProposalStatus'
+
+// TODO: seperate ProposalPlacard into own file ---------------
+interface ProposalPlacardProps {
+  proposal: Proposal
+  proposalNumber: number
+}
+
+function ProposalPlacard({ proposal, proposalNumber }: ProposalPlacardProps) {
+  return (
+    <Link
+      href={`/vote/${proposal.proposalId}`}
+      className="flex items-center justify-between w-full bg-skin-muted hover:bg-skin-backdrop border border-skin-stroke p-4 my-6 rounded-2xl">
+      <div className="flex items-center pr-4">
+        <div className="text-xl font-semibold text-skin-base">
+          <span className="text-skin-muted mr-3 sm:mr-4 sm:ml-2">
+            {proposalNumber}
+          </span>
+          {getProposalName(proposal.description)}
+        </div>
+      </div>
+      <ProposalStatus proposal={proposal} />
+    </Link>
+  )
+}
+// ----------------------------------
+
+// TODO: this is duped elsewhere
+type MarkdownSource = MDXRemoteSerializeResult<Record<string, unknown>>
+
+interface GovernancePageProps {
+  descriptionSource: MarkdownSource
+}
+
+export async function getStaticProps(): Promise<
+  GetStaticPropsResult<GovernancePageProps>
+> {
   // Get description markdown
   const templateDirectory = path.join(process.cwd(), 'templates')
   const descFile = await fs.readFile(
@@ -24,7 +56,7 @@ export const getStaticProps = async (): Promise<
     'utf8'
   )
   const descMD = await serialize(descFile, {
-    mdxOptions: { development: false },
+    mdxOptions: { remarkPlugins: [], rehypePlugins: [], development: false },
   })
 
   return {
@@ -35,9 +67,9 @@ export const getStaticProps = async (): Promise<
   }
 }
 
-export default function Vote({
+export default function GovernancePage({
   descriptionSource,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
+}: GovernancePageProps) {
   const { data: addresses } = useDAOAddresses({
     tokenContract: TOKEN_CONTRACT,
   })
@@ -85,29 +117,5 @@ export default function Vote({
         </div>
       </div>
     </Layout>
-  )
-}
-
-const ProposalPlacard = ({
-  proposal,
-  proposalNumber,
-}: {
-  proposal: Proposal
-  proposalNumber: number
-}) => {
-  return (
-    <Link
-      href={`/vote/${proposal.proposalId}`}
-      className="flex items-center justify-between w-full bg-skin-muted hover:bg-skin-backdrop border border-skin-stroke p-4 my-6 rounded-2xl">
-      <div className="flex items-center pr-4">
-        <div className="text-xl font-semibold text-skin-base">
-          <span className="text-skin-muted mr-3 sm:mr-4 sm:ml-2">
-            {proposalNumber}
-          </span>
-          {getProposalName(proposal.description)}
-        </div>
-      </div>
-      <ProposalStatus proposal={proposal} />
-    </Link>
   )
 }

@@ -1,11 +1,10 @@
-import Header from '../components/Header'
-import { useIsMounted } from 'hooks/useIsMounted'
-import { Fragment } from 'react'
-import Hero from '../components/Hero/Hero'
-import { GetStaticPropsResult, InferGetStaticPropsType } from 'next'
-import { serialize } from 'next-mdx-remote/serialize'
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
+import type { GetStaticPropsResult } from 'next'
 import { SWRConfig } from 'swr'
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
+import { serialize } from 'next-mdx-remote/serialize'
+import { promises as fs } from 'fs'
+import path from 'path'
+
 import {
   ContractInfo,
   getContractInfo,
@@ -13,28 +12,35 @@ import {
   TokenInfo,
 } from 'data/nouns-builder/token'
 import { AuctionInfo, getCurrentAuction } from 'data/nouns-builder/auction'
-import { promises as fs } from 'fs'
-import path from 'path'
-import Footer from '@/components/Footer'
-import FaqElement from '@/components/FaqElement'
 import { getAddresses } from '@/services/nouns-builder/manager'
+import { useIsMounted } from 'hooks/useIsMounted'
 
+import Hero from '@/components/Hero/Hero'
+import FaqElement from '@/components/FaqElement'
+
+// TODO: abstract Header/Footer into Layout wrapper
+import Layout from '@/components/Layout'
+import Footer from '@/components/Layout/Footer'
+import Header from '@/components/Layout/Header'
+
+// TODO: this is duped elsewhere
 type MarkdownSource = MDXRemoteSerializeResult<Record<string, unknown>>
 
-export const getStaticProps = async (): Promise<
-  GetStaticPropsResult<{
-    tokenContract: string
-    tokenId: string
-    contract: ContractInfo
-    token: TokenInfo
-    auction: AuctionInfo
-    descriptionSource: MarkdownSource
-    faqSources: MarkdownSource[]
-  }>
-> => {
+interface HomePageProps {
+  tokenContract: string
+  tokenId: string
+  contract: ContractInfo
+  token: TokenInfo
+  auction: AuctionInfo
+  descriptionSource: MarkdownSource
+  faqSources: MarkdownSource[]
+}
+
+export async function getStaticProps(): Promise<
+  GetStaticPropsResult<HomePageProps>
+> {
   // Get token and auction info
   const tokenContract = process.env.NEXT_PUBLIC_TOKEN_CONTRACT! as `0x${string}`
-
   const addresses = await getAddresses({ tokenAddress: tokenContract })
 
   const [contract, auction] = await Promise.all([
@@ -49,14 +55,13 @@ export const getStaticProps = async (): Promise<
   })
 
   // Get description and faq markdown
-
   const templateDirectory = path.join(process.cwd(), 'templates')
   const descFile = await fs.readFile(
     templateDirectory + '/home/description.md',
     'utf8'
   )
   const descMD = await serialize(descFile, {
-    mdxOptions: { development: false },
+    mdxOptions: { remarkPlugins: [], rehypePlugins: [], development: false },
   })
 
   let faqSources: MarkdownSource[] = []
@@ -83,7 +88,7 @@ export const getStaticProps = async (): Promise<
       )
     )
   } catch {
-    //Do Nothing (no FAQ directory)
+    // no FAQ directory, do nothing
   }
 
   if (!contract.image) contract.image = ''
@@ -102,7 +107,7 @@ export const getStaticProps = async (): Promise<
   }
 }
 
-export default function SiteComponent({
+export default function HomePage({
   tokenContract,
   tokenId,
   contract,
@@ -110,10 +115,13 @@ export default function SiteComponent({
   auction,
   descriptionSource,
   faqSources,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
+}: HomePageProps) {
   const isMounted = useIsMounted()
 
-  if (!isMounted) return <Fragment />
+  if (!isMounted) return <></>
+
+
+  // TODO: wrap this page in the Layout component, modify so Hero displays 100% across the screen
 
   return (
     <SWRConfig

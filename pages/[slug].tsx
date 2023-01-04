@@ -38,7 +38,7 @@ export const getStaticProps = async (
   const source = await fs.readFile(`${templateDirectory}/${slug}.md`, 'utf8')
   const mdxSource = await serialize(source, {
     parseFrontmatter: true,
-    mdxOptions: { development: false },
+    mdxOptions: { remarkPlugins: [], rehypePlugins: [], development: false },
   })
 
   return {

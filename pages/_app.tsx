@@ -13,7 +13,7 @@ const fullConfig = resolveConfig(tailwindConfig)
 const bg = (fullConfig.theme?.backgroundColor as any).skin
 const text = (fullConfig.theme?.textColor as any).skin
 
-const MyApp = ({ Component, pageProps }: AppProps) => {
+export default function App({ Component, pageProps }: AppProps) {
   useInitTheme()
 
   return (
@@ -37,4 +37,3 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     </SWRConfig>
   )
 }
-export default MyApp
