@@ -3,8 +3,13 @@ import DefaultProvider from '@/utils/DefaultProvider'
 
 const { governor } = BuilderSDK.connect({ signerOrProvider: DefaultProvider })
 
-// TODO: add typings to this
-export type Vote = any
+export type Vote = {
+  voter: `0x${string}`
+  proposalId: `0x${string}`
+  support: number
+  weight: number
+  reason: string
+}
 
 export type Proposal = {
   proposalId: `0x${string}`

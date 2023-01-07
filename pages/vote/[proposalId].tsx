@@ -6,9 +6,12 @@ import { useEnsName } from 'wagmi'
 import sanitizeHtml from 'sanitize-html'
 
 import { TOKEN_CONTRACT } from 'constants/addresses'
-import { Proposal } from '@/services/governor'
-import { useTokenBalance } from 'hooks/fetch/useTokenBalance'
-import { useDAOAddresses, useGetAllProposals } from 'hooks/fetch'
+import type { Proposal, Vote } from '@/services/governor'
+import {
+  useDAOAddresses,
+  useGetAllProposals,
+  useTokenBalance,
+} from '@/hooks/fetch'
 import { shortenAddress } from '@/utils/shortenAddress'
 import { getProposalName } from '@/utils/getProposalName'
 import { getProposalDescription } from '@/utils/getProposalDescription'
@@ -20,9 +23,43 @@ import ProposalStatus from '@/components/ProposalStatus'
 import { ArrowLeftIcon } from '@heroicons/react/20/solid'
 import { useEffect } from 'react'
 
-// TODO: get data for the individual votes
+function Voter({ vote }: { vote: Vote }) {
+  const { data: ensName } = useEnsName({
+    address: vote.voter,
+  })
+
+  return (
+    <small
+      className="w-80 p-4"
+      style={{ outline: '1px solid red' }}
+      key={vote.voter}>
+      <ul>
+        <li>voter: {ensName || shortenAddress(vote.voter)}</li>
+        <li>support: {vote.support}</li>
+        <li>weight: {vote.weight}</li>
+        <li>reason: {vote.reason}</li>
+      </ul>
+    </small>
+  )
+}
+
+function VoterSection({ votes }: { votes: Vote[] }) {
+  return (
+    <div className="flex flex-wrap justify-evenly">
+      {votes.map(vote => {
+        return <Voter vote={vote} />
+      })}
+    </div>
+  )
+}
 
 export default function ProposalPage() {
+  const {
+    query: { proposalId },
+  } = useRouter()
+
+  const [votes, setVotes] = useState<Vote[]>([])
+
   // fetch proposal data
   const { data: addresses } = useDAOAddresses({
     tokenContract: TOKEN_CONTRACT,
@@ -34,27 +71,17 @@ export default function ProposalPage() {
   })
 
   // parse proposals and pluck out the one for the requested page
-  const {
-    query: { proposalId },
-  } = useRouter()
   const proposalNumber = proposals
     ? proposals.length - proposals.findIndex(x => x.proposalId === proposalId)
     : 0
   const proposal = proposals?.find(x => x.proposalId === proposalId)
 
-
-
-
-  
-
-
-
-
-  // -----------------------WIP------------------------------------
+  const { data: ensName } = useEnsName({
+    address: proposal?.proposal.proposer,
+  })
 
   // fetch all votes for proposal
-  const [votes, setVotes] = useState<any>([])
-
+  // TODO: to this to `hooks/fetch` with a custom hook
   useEffect(() => {
     if (proposal) {
       fetch(`/api/governor/${governorContract}/votes/${proposalId}`)
@@ -64,29 +91,6 @@ export default function ProposalPage() {
         })
     }
   }, [proposal])
-
-
-  // TODO: for debugging, delete
-  useEffect(() => {
-    if (votes.length) {
-      console.log(votes)
-    }
-  }, [votes])
-
-  // -----------------------^ WIP-----------------------------------
-
-
-
-
-
-
-
-
-
-
-  const { data: ensName } = useEnsName({
-    address: proposal?.proposal.proposer,
-  })
 
   const {
     forVotes = 0,
@@ -140,7 +144,7 @@ export default function ProposalPage() {
             <ArrowLeftIcon className="h-4" />
           </Link>
 
-          <div className="">
+          <div>
             <div className="flex items-center">
               <div className="font-heading text-2xl text-skin-muted mr-4 break-words">
                 Proposal {proposalNumber}
@@ -189,6 +193,8 @@ export default function ProposalPage() {
         </div>
       </div>
 
+      <VoterSection votes={votes} />
+
       <div className="items-center w-full grid sm:grid-cols-3 gap-4 mt-4">
         <div className="w-full border border-skin-stroke rounded-xl p-6 flex justify-between items-center sm:items-baseline">
           <div className="font-heading text-xl text-skin-muted">Threshold</div>
@@ -203,16 +209,16 @@ export default function ProposalPage() {
         <div className="w-full border border-skin-stroke rounded-xl p-6 flex justify-between items-center sm:items-baseline">
           <div className="font-heading text-xl text-skin-muted">Ends</div>
           <div className="text-right">
-            <div className="text-skin-muted">{getTime(voteEnd)}</div>
-            <div className="font-semibold">{getDate(voteEnd)}</div>
+            <div className="text-skin-muted">{getTime(voteEnd || 0)}</div>
+            <div className="font-semibold">{getDate(voteEnd || 0)}</div>
           </div>
         </div>
 
         <div className="w-full border border-skin-stroke rounded-xl p-6 flex justify-between items-center sm:items-baseline">
           <div className="font-heading text-xl text-skin-muted">Snapshot</div>
           <div className="text-right">
-            <div className="text-skin-muted">{getTime(voteStart)}</div>
-            <div className="font-semibold">{getDate(voteStart)}</div>
+            <div className="text-skin-muted">{getTime(voteStart || 0)}</div>
+            <div className="font-semibold">{getDate(voteStart || 0)}</div>
           </div>
         </div>
       </div>
