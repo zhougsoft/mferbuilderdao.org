@@ -23,36 +23,6 @@ import ProposalStatus from '@/components/ProposalStatus'
 import { ArrowLeftIcon } from '@heroicons/react/20/solid'
 import { useEffect } from 'react'
 
-function Voter({ vote }: { vote: Vote }) {
-  const { data: ensName } = useEnsName({
-    address: vote.voter,
-  })
-
-  return (
-    <small
-      className="w-80 p-4"
-      style={{ outline: '1px solid red' }}
-      key={vote.voter}>
-      <ul>
-        <li>voter: {ensName || shortenAddress(vote.voter)}</li>
-        <li>support: {vote.support}</li>
-        <li>weight: {vote.weight}</li>
-        <li>reason: {vote.reason}</li>
-      </ul>
-    </small>
-  )
-}
-
-function VoterSection({ votes }: { votes: Vote[] }) {
-  return (
-    <div className="flex flex-wrap justify-evenly">
-      {votes.map(vote => {
-        return <Voter vote={vote} />
-      })}
-    </div>
-  )
-}
-
 export default function ProposalPage() {
   const {
     query: { proposalId },
@@ -239,13 +209,13 @@ export default function ProposalPage() {
   )
 }
 
-const VoteButton = ({
+function VoteButton({
   proposal,
   proposalNumber,
 }: {
   proposal: Proposal
   proposalNumber: number
-}) => {
+}) {
   const [modalOpen, setModalOpen] = useState(false)
   const { data: userBalance } = useTokenBalance({
     tokenContract: TOKEN_CONTRACT,
@@ -271,7 +241,7 @@ const VoteButton = ({
   )
 }
 
-const ProgressBar = ({
+function ProgressBar({
   label,
   type,
   value,
@@ -281,7 +251,7 @@ const ProgressBar = ({
   value: number
   percentage: number
   type: 'success' | 'danger' | 'muted'
-}) => {
+}) {
   let textColor
   let baseColor
   let bgColor
@@ -317,6 +287,65 @@ const ProgressBar = ({
           className={`${baseColor} h-4 rounded-full`}
           style={{ width: `${percentage}%` }}></div>
       </div>
+    </div>
+  )
+}
+
+function Voter({ vote }: { vote: Vote }) {
+  const { data: ensName } = useEnsName({
+    address: vote.voter,
+  })
+
+  let borderColor
+  let voteDirection
+  switch (vote.support) {
+    case 1: // YES vote
+      borderColor = 'green'
+      voteDirection = 'for'
+      break
+    case 2: // ABSTAIN vote
+      borderColor = 'gray'
+      voteDirection = 'abstained'
+      break
+    default: // NO vote
+      borderColor = 'red'
+      voteDirection = 'against'
+      break
+  }
+
+  return (
+    <div
+      className="w-80 h-fit p-4 m-2"
+      style={{ outline: `0.25rem solid ${borderColor}`, borderRadius: '10px' }}
+      key={vote.voter}>
+      <ul>
+        <li>
+          <strong>{ensName || shortenAddress(vote.voter)}</strong>
+        </li>
+        <li>
+          <strong>{vote.weight}</strong> votes{' '}
+          <strong>{voteDirection.toUpperCase()}</strong>
+        </li>
+      </ul>
+      {vote.reason && (
+        <>
+          <hr className="my-2" />
+
+          <small>
+            <em>{vote.reason}</em>
+          </small>
+        </>
+      )}
+    </div>
+  )
+}
+
+function VoterSection({ votes }: { votes: Vote[] }) {
+  return (
+    <div className="flex flex-wrap justify-evenly">
+      {votes.map(vote => (
+        <Voter key={vote.voter} vote={vote} />
+      ))}
     </div>
   )
 }
