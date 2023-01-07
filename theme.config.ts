@@ -13,6 +13,7 @@ export const theme: ThemeConfig = merge(lightTheme, {
       { label: 'auction', href: '/' },
       { label: 'vote', href: '/vote' },
       { label: 'manifesto', href: '/manifesto' },
+      { label: 'analytics', href: '/analytics' },
     ],
     secondary: [],
   },
