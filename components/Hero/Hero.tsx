@@ -11,8 +11,8 @@ import {
   useTheme,
 } from 'hooks'
 import { usePreviousAuctions } from '@/hooks/fetch/usePreviousAuctions'
-import { AuctionInfo } from '@/services/nouns-builder/auction'
-import { ContractInfo } from '@/services/nouns-builder/token'
+import { AuctionInfo } from '@/services/auction'
+import { ContractInfo } from '@/services/token'
 import { compareAddress } from '@/utils/compareAddress'
 import { shortenAddress } from '@/utils/shortenAddress'
 

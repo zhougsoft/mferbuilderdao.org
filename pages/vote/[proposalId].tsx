@@ -6,7 +6,7 @@ import { useEnsName } from 'wagmi'
 import sanitizeHtml from 'sanitize-html'
 
 import { TOKEN_CONTRACT } from 'constants/addresses'
-import { Proposal } from '@/services/nouns-builder/governor'
+import { Proposal } from '@/services/governor'
 import { useTokenBalance } from 'hooks/fetch/useTokenBalance'
 import { useDAOAddresses, useGetAllProposals } from 'hooks/fetch'
 import { shortenAddress } from '@/utils/shortenAddress'
@@ -18,41 +18,83 @@ import ModalWrapper from '@/components/ModalWrapper'
 import VoteModal from '@/components/VoteModal'
 import ProposalStatus from '@/components/ProposalStatus'
 import { ArrowLeftIcon } from '@heroicons/react/20/solid'
+import { useEffect } from 'react'
+
+// TODO: get data for the individual votes
 
 export default function ProposalPage() {
+  // fetch proposal data
   const { data: addresses } = useDAOAddresses({
     tokenContract: TOKEN_CONTRACT,
   })
+
+  const governorContract = addresses?.governor
   const { data: proposals } = useGetAllProposals({
     governorContract: addresses?.governor,
   })
 
+  // parse proposals and pluck out the one for the requested page
   const {
     query: { proposalId },
   } = useRouter()
-
   const proposalNumber = proposals
     ? proposals.length - proposals.findIndex(x => x.proposalId === proposalId)
     : 0
-
   const proposal = proposals?.find(x => x.proposalId === proposalId)
-  const isActive = proposal?.state === 1
+
+
+
+
+  
+
+
+
+
+  // -----------------------WIP------------------------------------
+
+  // fetch all votes for proposal
+  const [votes, setVotes] = useState<any>([])
+
+  useEffect(() => {
+    if (proposal) {
+      fetch(`/api/governor/${governorContract}/votes/${proposalId}`)
+        .then(res => res.json())
+        .then(data => {
+          setVotes(data)
+        })
+    }
+  }, [proposal])
+
+
+  // TODO: for debugging, delete
+  useEffect(() => {
+    if (votes.length) {
+      console.log(votes)
+    }
+  }, [votes])
+
+  // -----------------------^ WIP-----------------------------------
+
+
+
+
+
+
+
+
+
 
   const { data: ensName } = useEnsName({
     address: proposal?.proposal.proposer,
   })
 
-  if (!proposal)
-    return (
-      <Layout>
-        <div className="flex items-center justify-around mt-8">
-          <Image src={'/spinner.svg'} alt="spinner" width={30} height={30} />
-        </div>
-      </Layout>
-    )
-
-  const { forVotes, againstVotes, abstainVotes, voteEnd, voteStart } =
-    proposal?.proposal || {}
+  const {
+    forVotes = 0,
+    againstVotes = 0,
+    abstainVotes = 0,
+    voteEnd,
+    voteStart,
+  } = proposal?.proposal || {}
 
   const getVotePercentage = (votes: number) => {
     if (!proposal || !votes) return 0
@@ -78,6 +120,15 @@ export default function ProposalPage() {
 
     return `${hours}:${minutes} ${date.getHours() >= 12 ? 'PM' : 'AM'}`
   }
+
+  if (!proposal)
+    return (
+      <Layout>
+        <div className="flex items-center justify-around mt-8">
+          <Image src={'/spinner.svg'} alt="spinner" width={30} height={30} />
+        </div>
+      </Layout>
+    )
 
   return (
     <Layout>

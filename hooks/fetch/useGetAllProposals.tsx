@@ -1,4 +1,4 @@
-import { Proposal } from '@/services/nouns-builder/governor'
+import { Proposal } from '@/services/governor'
 import useSWR from 'swr'
 
 export const useGetAllProposals = ({

@@ -10,9 +10,9 @@ import {
   getContractInfo,
   getTokenInfo,
   TokenInfo,
-} from 'data/nouns-builder/token'
-import { AuctionInfo, getCurrentAuction } from 'data/nouns-builder/auction'
-import { getAddresses } from '@/services/nouns-builder/manager'
+} from 'services/token'
+import { AuctionInfo, getCurrentAuction } from 'services/auction'
+import { getAddresses } from '@/services/manager'
 import { useIsMounted } from 'hooks/useIsMounted'
 
 import Hero from '@/components/Hero/Hero'

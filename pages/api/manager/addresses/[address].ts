@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getAddresses } from "data/nouns-builder/manager";
+import { getAddresses } from "services/manager";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { address } = req.query;

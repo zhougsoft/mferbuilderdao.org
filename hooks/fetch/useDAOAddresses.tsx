@@ -1,4 +1,4 @@
-import { DAOAddresses } from '@/services/nouns-builder/manager'
+import { DAOAddresses } from '@/services/manager'
 import useSWR from 'swr'
 
 export const useDAOAddresses = ({

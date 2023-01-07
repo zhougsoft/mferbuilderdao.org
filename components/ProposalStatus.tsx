@@ -1,4 +1,4 @@
-import { Proposal } from "@/services/nouns-builder/governor";
+import { Proposal } from "@/services/governor";
 import { Fragment } from "react";
 
 export default function ProposalStatus({ proposal }: { proposal: Proposal }) {

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getTokenInfo } from "data/nouns-builder/token";
+import { getTokenInfo } from "services/token";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { address, tokenid } = req.query;
