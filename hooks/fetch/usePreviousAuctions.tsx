@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { PreviousAuction } from '@/services/nouns-builder/auction'
+import { PreviousAuction } from '@/services/auction'
 
 export const usePreviousAuctions = ({
   auctionContract,

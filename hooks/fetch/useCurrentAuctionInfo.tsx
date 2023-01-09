@@ -1,4 +1,4 @@
-import { AuctionInfo } from 'data/nouns-builder/auction'
+import { AuctionInfo } from 'services/auction'
 import useSWR from 'swr'
 
 export const useCurrentAuctionInfo = ({

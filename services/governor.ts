@@ -3,6 +3,14 @@ import DefaultProvider from '@/utils/DefaultProvider'
 
 const { governor } = BuilderSDK.connect({ signerOrProvider: DefaultProvider })
 
+export type Vote = {
+  voter: `0x${string}`
+  proposalId: `0x${string}`
+  support: number
+  weight: number
+  reason: string
+}
+
 export type Proposal = {
   proposalId: `0x${string}`
   targets: `0x${string}`[]
@@ -100,7 +108,7 @@ export const getProposals = async ({ address }: { address: `0x${string}` }) => {
         getProposalState({ address, proposalId }),
       ])
 
-      // Get from array becuase of ethers naming collision
+      // Get from array because of ethers naming collision
       const values = (event.args as any)[2]
 
       return {
@@ -119,4 +127,38 @@ export const getProposals = async ({ address }: { address: `0x${string}` }) => {
   return proposalResponse.sort(
     (a, b) => b.proposal.timeCreated - a.proposal.timeCreated
   )
+}
+
+export const getProposalVotes = async ({
+  address,
+  proposalId,
+}: {
+  address: `0x${string}`
+  proposalId: string
+}) => {
+  // query the onchain VoteCast event:
+  // event VoteCast(address voter, bytes32 proposalId, uint256 support, uint256 weight, string reason)
+  const governorContract = governor({ address })
+  const filter = governorContract.filters.VoteCast(null, null, null, null, null)
+  const events = await governorContract.queryFilter(filter)
+
+  // get votes that were cast for the given proposal id
+  const votes = events.reduce((acc, event) => {
+    const voteProposalId = event.args ? event.args[1] : null
+
+    if (voteProposalId && voteProposalId === proposalId) {
+      const { voter, support, weight, reason } = event.args as any
+
+      acc.push({
+        voter,
+        proposalId: voteProposalId,
+        support: support.toNumber(),
+        weight: weight.toNumber(),
+        reason,
+      } as Vote)
+    }
+    return acc
+  }, [] as Vote[])
+
+  return votes
 }

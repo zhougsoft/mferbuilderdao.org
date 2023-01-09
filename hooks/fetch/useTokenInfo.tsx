@@ -1,4 +1,4 @@
-import { TokenInfo } from 'data/nouns-builder/token'
+import { TokenInfo } from 'services/token'
 import { TOKEN_CONTRACT } from 'constants/addresses'
 import useSWR from 'swr'
 

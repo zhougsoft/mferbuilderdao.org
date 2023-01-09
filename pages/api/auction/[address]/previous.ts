@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getPreviousAuctions } from "data/nouns-builder/auction";
+import { getPreviousAuctions } from "services/auction";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { address } = req.query;
