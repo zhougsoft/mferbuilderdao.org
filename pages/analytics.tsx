@@ -7,15 +7,20 @@ import path from 'path'
 
 import { useIsMounted } from 'hooks/useIsMounted'
 
+<<<<<<< HEAD
 import Hero from '@/components/Hero/Hero'
 import FaqElement from '@/components/FaqElement'
 
 // TODO: abstract Header/Footer into Layout wrapper
 import Layout from '@/components/Layout'
+=======
+import GovernanceAnalytics from '@/components/AnalyticsGovernance'
+>>>>>>> dev
 import Footer from '@/components/Layout/Footer'
 import Header from '@/components/Layout/Header'
 type MarkdownSource = MDXRemoteSerializeResult<Record<string, unknown>>
 
+<<<<<<< HEAD
 interface AnlayticsPageProps {    
   descriptionSource: MarkdownSource
   faqSources: MarkdownSource[]
@@ -64,15 +69,44 @@ export async function getStaticProps(): Promise<
     props: {
       descriptionSource: descMD,
       faqSources,
+=======
+interface AnalyticsPageProps {    
+  descriptionSource: MarkdownSource
+}
+export async function getStaticProps(): Promise<
+  GetStaticPropsResult<AnalyticsPageProps>
+> {
+  // Get description and faq markdown
+  const templateDirectory = path.join(process.cwd(), 'templates')
+
+  const analyticsFile = await fs.readFile(
+    templateDirectory + '/analytics.md',
+    'utf8'
+  )
+  const analyticsMD = await serialize(analyticsFile, {
+    mdxOptions: { remarkPlugins: [], rehypePlugins: [], development: false },
+  })
+
+
+  return {
+    props: {
+      descriptionSource: analyticsMD,
+>>>>>>> dev
     },
     revalidate: 60,
   }
 }
 
+<<<<<<< HEAD
 export default function HomePage({
   descriptionSource,
   faqSources,
 }: AnlayticsPageProps) {
+=======
+export default function AnalyticsPage({
+  descriptionSource,
+}: AnalyticsPageProps) {
+>>>>>>> dev
   const isMounted = useIsMounted()
 
   if (!isMounted) return <></>
@@ -81,6 +115,7 @@ export default function HomePage({
 
   return (
     <SWRConfig>
+<<<<<<< HEAD
       <div className="bg-skin-backdrop text-skin-base min-h-screen flex flex-col items-center justify-around">
         <div className="bg-skin-fill w-full flex items-center justify-around">
           <div className="max-w-[1400px]">
@@ -112,6 +147,19 @@ export default function HomePage({
               </div>
             </div>
           </div>
+=======
+      <div className="bg-skin-backdrop text-skin-base min-h-screen flex flex-col items-center">
+        <div className="bg-skin-fill w-full flex items-center justify-around">
+          <div className="max-w-[1400px]">
+            <Header />
+          </div>
+        </div>
+        <div className="max-w-[1400px] w-full">
+          <GovernanceAnalytics/>
+          {/*Holders analytics*/}
+          {/*Treasury analytics*/}
+          {/*Auctions analytics*/}
+>>>>>>> dev
           <Footer />
         </div>
       </div>

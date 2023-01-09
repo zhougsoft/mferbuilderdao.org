@@ -6,7 +6,7 @@ import { serialize } from 'next-mdx-remote/serialize'
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
 
 import { TOKEN_CONTRACT } from 'constants/addresses'
-import { Proposal } from '@/services/nouns-builder/governor'
+import { Proposal } from '@/services/governor'
 import { useDAOAddresses, useGetAllProposals, useTreasuryBalance } from 'hooks'
 import { getProposalName } from '@/utils/getProposalName'
 import { formatTreasuryBalance } from '@/utils/formatTreasuryBalance'

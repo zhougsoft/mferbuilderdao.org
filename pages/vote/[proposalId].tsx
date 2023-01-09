@@ -6,9 +6,12 @@ import { useEnsName } from 'wagmi'
 import sanitizeHtml from 'sanitize-html'
 
 import { TOKEN_CONTRACT } from 'constants/addresses'
-import { Proposal } from '@/services/nouns-builder/governor'
-import { useTokenBalance } from 'hooks/fetch/useTokenBalance'
-import { useDAOAddresses, useGetAllProposals } from 'hooks/fetch'
+import type { Proposal, Vote } from '@/services/governor'
+import {
+  useDAOAddresses,
+  useGetAllProposals,
+  useTokenBalance,
+} from '@/hooks/fetch'
 import { shortenAddress } from '@/utils/shortenAddress'
 import { getProposalName } from '@/utils/getProposalName'
 import { getProposalDescription } from '@/utils/getProposalDescription'
@@ -18,41 +21,54 @@ import ModalWrapper from '@/components/ModalWrapper'
 import VoteModal from '@/components/VoteModal'
 import ProposalStatus from '@/components/ProposalStatus'
 import { ArrowLeftIcon } from '@heroicons/react/20/solid'
+import { useEffect } from 'react'
 
 export default function ProposalPage() {
-  const { data: addresses } = useDAOAddresses({
-    tokenContract: TOKEN_CONTRACT,
-  })
-  const { data: proposals } = useGetAllProposals({
-    governorContract: addresses?.governor,
-  })
-
   const {
     query: { proposalId },
   } = useRouter()
 
+  const [votes, setVotes] = useState<Vote[]>([])
+
+  // fetch proposal data
+  const { data: addresses } = useDAOAddresses({
+    tokenContract: TOKEN_CONTRACT,
+  })
+
+  const governorContract = addresses?.governor
+  const { data: proposals } = useGetAllProposals({
+    governorContract: addresses?.governor,
+  })
+
+  // parse proposals and pluck out the one for the requested page
   const proposalNumber = proposals
     ? proposals.length - proposals.findIndex(x => x.proposalId === proposalId)
     : 0
-
   const proposal = proposals?.find(x => x.proposalId === proposalId)
-  const isActive = proposal?.state === 1
 
   const { data: ensName } = useEnsName({
     address: proposal?.proposal.proposer,
   })
 
-  if (!proposal)
-    return (
-      <Layout>
-        <div className="flex items-center justify-around mt-8">
-          <Image src={'/spinner.svg'} alt="spinner" width={30} height={30} />
-        </div>
-      </Layout>
-    )
+  // fetch all votes for proposal
+  // TODO: to this to `hooks/fetch` with a custom hook
+  useEffect(() => {
+    if (proposal) {
+      fetch(`/api/governor/${governorContract}/votes/${proposalId}`)
+        .then(res => res.json())
+        .then(data => {
+          setVotes(data)
+        })
+    }
+  }, [proposal])
 
-  const { forVotes, againstVotes, abstainVotes, voteEnd, voteStart } =
-    proposal?.proposal || {}
+  const {
+    forVotes = 0,
+    againstVotes = 0,
+    abstainVotes = 0,
+    voteEnd,
+    voteStart,
+  } = proposal?.proposal || {}
 
   const getVotePercentage = (votes: number) => {
     if (!proposal || !votes) return 0
@@ -79,6 +95,15 @@ export default function ProposalPage() {
     return `${hours}:${minutes} ${date.getHours() >= 12 ? 'PM' : 'AM'}`
   }
 
+  if (!proposal)
+    return (
+      <Layout>
+        <div className="flex items-center justify-around mt-8">
+          <Image src={'/spinner.svg'} alt="spinner" width={30} height={30} />
+        </div>
+      </Layout>
+    )
+
   return (
     <Layout>
       <div className="flex flex-col sm:flex-row items-baseline justify-between">
@@ -89,7 +114,7 @@ export default function ProposalPage() {
             <ArrowLeftIcon className="h-4" />
           </Link>
 
-          <div className="">
+          <div>
             <div className="flex items-center">
               <div className="font-heading text-2xl text-skin-muted mr-4 break-words">
                 Proposal {proposalNumber}
@@ -138,6 +163,8 @@ export default function ProposalPage() {
         </div>
       </div>
 
+      <VoterSection votes={votes} />
+
       <div className="items-center w-full grid sm:grid-cols-3 gap-4 mt-4">
         <div className="w-full border border-skin-stroke rounded-xl p-6 flex justify-between items-center sm:items-baseline">
           <div className="font-heading text-xl text-skin-muted">Threshold</div>
@@ -152,16 +179,16 @@ export default function ProposalPage() {
         <div className="w-full border border-skin-stroke rounded-xl p-6 flex justify-between items-center sm:items-baseline">
           <div className="font-heading text-xl text-skin-muted">Ends</div>
           <div className="text-right">
-            <div className="text-skin-muted">{getTime(voteEnd)}</div>
-            <div className="font-semibold">{getDate(voteEnd)}</div>
+            <div className="text-skin-muted">{getTime(voteEnd || 0)}</div>
+            <div className="font-semibold">{getDate(voteEnd || 0)}</div>
           </div>
         </div>
 
         <div className="w-full border border-skin-stroke rounded-xl p-6 flex justify-between items-center sm:items-baseline">
           <div className="font-heading text-xl text-skin-muted">Snapshot</div>
           <div className="text-right">
-            <div className="text-skin-muted">{getTime(voteStart)}</div>
-            <div className="font-semibold">{getDate(voteStart)}</div>
+            <div className="text-skin-muted">{getTime(voteStart || 0)}</div>
+            <div className="font-semibold">{getDate(voteStart || 0)}</div>
           </div>
         </div>
       </div>
@@ -182,13 +209,13 @@ export default function ProposalPage() {
   )
 }
 
-const VoteButton = ({
+function VoteButton({
   proposal,
   proposalNumber,
 }: {
   proposal: Proposal
   proposalNumber: number
-}) => {
+}) {
   const [modalOpen, setModalOpen] = useState(false)
   const { data: userBalance } = useTokenBalance({
     tokenContract: TOKEN_CONTRACT,
@@ -214,7 +241,7 @@ const VoteButton = ({
   )
 }
 
-const ProgressBar = ({
+function ProgressBar({
   label,
   type,
   value,
@@ -224,7 +251,7 @@ const ProgressBar = ({
   value: number
   percentage: number
   type: 'success' | 'danger' | 'muted'
-}) => {
+}) {
   let textColor
   let baseColor
   let bgColor
@@ -260,6 +287,65 @@ const ProgressBar = ({
           className={`${baseColor} h-4 rounded-full`}
           style={{ width: `${percentage}%` }}></div>
       </div>
+    </div>
+  )
+}
+
+function Voter({ vote }: { vote: Vote }) {
+  const { data: ensName } = useEnsName({
+    address: vote.voter,
+  })
+
+  let borderColor
+  let voteDirection
+  switch (vote.support) {
+    case 1: // YES vote
+      borderColor = 'green'
+      voteDirection = 'for'
+      break
+    case 2: // ABSTAIN vote
+      borderColor = 'gray'
+      voteDirection = 'abstained'
+      break
+    default: // NO vote
+      borderColor = 'red'
+      voteDirection = 'against'
+      break
+  }
+
+  return (
+    <div
+      className="w-80 h-fit p-4 m-2"
+      style={{ outline: `0.25rem solid ${borderColor}`, borderRadius: '10px' }}
+      key={vote.voter}>
+      <ul>
+        <li>
+          <strong>{ensName || shortenAddress(vote.voter)}</strong>
+        </li>
+        <li>
+          <strong>{vote.weight}</strong> votes{' '}
+          <strong>{voteDirection.toUpperCase()}</strong>
+        </li>
+      </ul>
+      {vote.reason && (
+        <>
+          <hr className="my-2" />
+
+          <small>
+            <em>{vote.reason}</em>
+          </small>
+        </>
+      )}
+    </div>
+  )
+}
+
+function VoterSection({ votes }: { votes: Vote[] }) {
+  return (
+    <div className="flex flex-wrap justify-evenly">
+      {votes.map(vote => (
+        <Voter key={vote.voter} vote={vote} />
+      ))}
     </div>
   )
 }

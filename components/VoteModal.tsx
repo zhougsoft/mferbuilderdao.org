@@ -1,5 +1,5 @@
 import { useTokenBalance } from "@/hooks/fetch/useTokenBalance";
-import { Proposal } from "@/services/nouns-builder/governor";
+import { Proposal } from "@/services/governor";
 import { TOKEN_CONTRACT } from "constants/addresses";
 import {
   useContractWrite,
