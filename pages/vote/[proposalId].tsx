@@ -23,12 +23,44 @@ import ProposalStatus from '@/components/ProposalStatus'
 import { ArrowLeftIcon } from '@heroicons/react/20/solid'
 import { useEffect } from 'react'
 
+interface VoteTally {
+  votedFor: Vote[]
+  votedAgainst: Vote[]
+  abstained: Vote[]
+}
+
+// sorts array of Votes by FOR, AGAINST and ABSTAINED
+const tallyVotes = (votes: Vote[]): VoteTally => {
+  const votedFor = []
+  const votedAgainst = []
+  const abstained = []
+
+  for (const vote of votes) {
+    switch (vote.support) {
+      case 1: // for
+        votedFor.push(vote)
+        break
+      case 2: // abstained
+        abstained.push(vote)
+        break
+      default: // against
+        votedAgainst.push(vote)
+    }
+  }
+
+  return {
+    votedFor,
+    votedAgainst,
+    abstained,
+  }
+}
+
 export default function ProposalPage() {
   const {
     query: { proposalId },
   } = useRouter()
 
-  const [votes, setVotes] = useState<Vote[]>([])
+  const [voteTally, setVoteTally] = useState<VoteTally>()
 
   // fetch proposal data
   const { data: addresses } = useDAOAddresses({
@@ -56,8 +88,9 @@ export default function ProposalPage() {
     if (proposal) {
       fetch(`/api/governor/${governorContract}/votes/${proposalId}`)
         .then(res => res.json())
-        .then(data => {
-          setVotes(data)
+        .then(voteResults => {
+          const talliedVotes = tallyVotes(voteResults)
+          setVoteTally(talliedVotes)
         })
     }
   }, [proposal])
@@ -70,11 +103,11 @@ export default function ProposalPage() {
     voteStart,
   } = proposal?.proposal || {}
 
-  const getVotePercentage = (votes: number) => {
-    if (!proposal || !votes) return 0
+  const getVotePercentage = (voteAmt: number) => {
+    if (!proposal || !voteAmt) return 0
     const total = forVotes + againstVotes + abstainVotes
 
-    const value = Math.round((votes / total) * 100)
+    const value = Math.round((voteAmt / total) * 100)
     if (value > 100) return 100
     return value
   }
@@ -163,7 +196,7 @@ export default function ProposalPage() {
         </div>
       </div>
 
-      <VoterSection votes={votes} />
+      <VoterSection voteTally={voteTally} />
 
       <div className="items-center w-full grid sm:grid-cols-3 gap-4 mt-4">
         <div className="w-full border border-skin-stroke rounded-xl p-6 flex justify-between items-center sm:items-baseline">
@@ -292,6 +325,8 @@ function ProgressBar({
 }
 
 function Voter({ vote }: { vote: Vote }) {
+  const [showReason, setShowReason] = useState<boolean>(false)
+
   const { data: ensName } = useEnsName({
     address: vote.voter,
   })
@@ -315,8 +350,8 @@ function Voter({ vote }: { vote: Vote }) {
 
   return (
     <div
-      className="w-80 h-fit p-4 m-2"
-      style={{ outline: `0.25rem solid ${borderColor}`, borderRadius: '10px' }}
+      className="h-fit mb-4 p-2"
+      style={{ outline: `0.15rem solid ${borderColor}`, borderRadius: '10px' }}
       key={vote.voter}>
       <ul>
         <li>
@@ -328,9 +363,15 @@ function Voter({ vote }: { vote: Vote }) {
         </li>
       </ul>
       {vote.reason && (
+        <button
+          className={`border border-${borderColor}-500 rounded px-2 py-1 mt-2`}
+          onClick={() => setShowReason(prev => !prev)}>
+          {showReason ? '⬆️ hide reason' : '⬇️ show reason'}
+        </button>
+      )}
+      {vote.reason && showReason && (
         <>
           <hr className="my-2" />
-
           <small>
             <em>{vote.reason}</em>
           </small>
@@ -340,12 +381,31 @@ function Voter({ vote }: { vote: Vote }) {
   )
 }
 
-function VoterSection({ votes }: { votes: Vote[] }) {
+function VoterSection({ voteTally }: { voteTally?: VoteTally }) {
+  console.log(voteTally)
+
+  // TODO: proper loading indicator here
+  if (!voteTally) return <></>
+
+  const { votedFor = [], votedAgainst = [], abstained = [] } = voteTally
+
   return (
-    <div className="flex flex-wrap justify-evenly">
-      {votes.map(vote => (
-        <Voter key={vote.voter} vote={vote} />
-      ))}
+    <div className="w-full grid grid-cols-3 gap-4 mt-4">
+      <div className="w-full bg-skin-muted border border-skin-stroke rounded-xl p-6">
+        {votedFor.map(vote => (
+          <Voter key={vote.voter} vote={vote} />
+        ))}
+      </div>
+      <div className="w-full bg-skin-muted border border-skin-stroke rounded-xl p-6">
+        {votedAgainst.map(vote => (
+          <Voter key={vote.voter} vote={vote} />
+        ))}
+      </div>
+      <div className="w-full bg-skin-muted border border-skin-stroke rounded-xl p-6">
+        {abstained.map(vote => (
+          <Voter key={vote.voter} vote={vote} />
+        ))}
+      </div>
     </div>
   )
 }
