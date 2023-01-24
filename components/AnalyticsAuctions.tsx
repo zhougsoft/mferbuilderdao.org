@@ -1,8 +1,7 @@
-import { SWRConfig } from 'swr'
-export default function GovernanceAnalytics() {
+export default function AuctionsAnalytics() {
   return (
-    <SWRConfig>
+    <div>
       <h1>Auctions</h1>
-    </SWRConfig>
+    </div>
   )
 }

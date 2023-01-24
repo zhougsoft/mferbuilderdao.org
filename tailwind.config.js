@@ -17,6 +17,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      width: {
+        '110':'65rem'
+      },
       colors: {
         skin: {
           base: withOpacity('--color-text-base'),
