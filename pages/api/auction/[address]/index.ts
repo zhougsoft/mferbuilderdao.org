@@ -1,16 +1,19 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { getCurrentAuction } from "services/auction";
+import { NextApiRequest, NextApiResponse } from 'next'
+import { getCurrentAuction, getAuctionBids } from 'services/auction'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { address } = req.query;
-  const auctionInfo = await getCurrentAuction({ address: address as string });
+  const { address } = req.query
 
-  const ONE_DAY_IN_SECONDS = 60 * 60 * 24;
+  const auctionInfo = await getCurrentAuction({
+    address: address as `0x${string}`,
+  })
+
+  const ONE_DAY_IN_SECONDS = 60 * 60 * 24
   res.setHeader(
-    "Cache-Control",
+    'Cache-Control',
     `s-maxage=60, stale-while-revalidate=${ONE_DAY_IN_SECONDS}`
-  );
-  res.send(auctionInfo);
-};
+  )
+  res.send({ auctionInfo })
+}
 
-export default handler;
+export default handler

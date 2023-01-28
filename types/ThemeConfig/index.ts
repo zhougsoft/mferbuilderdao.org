@@ -12,7 +12,6 @@ export type ThemeConfig = {
     currentBid?: string
     auctionEndsIn?: string
     placeBid?: string
-    highestBidder?: string
     connectWallet?: string
     wrongNetwork?: string
   }

@@ -56,7 +56,7 @@ export const getTokenInfo = async ({
   tokenid,
 }: {
   address: string
-  tokenid: string
+  tokenid: string | number
 }) => {
   const tokenContract = token({
     address: address as string,

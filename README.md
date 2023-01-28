@@ -19,9 +19,7 @@ bootstrapped from the [noun-site](https://github.com/neokry/noun-site) starter b
 1. install dependencies
 
    ```bash
-   npm install
-   # or
-   yarn install
+   yarn
    ```
 
 2. make a copy of `.env.example` called `.env.local`
@@ -49,8 +47,6 @@ bootstrapped from the [noun-site](https://github.com/neokry/noun-site) starter b
 
 5. run local development server
    ```bash
-   npm run dev
-   # or
    yarn dev
    ```
 6. navigate to [http://localhost:3000](http://localhost:3000) in your browser of choice

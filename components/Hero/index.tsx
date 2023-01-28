@@ -1,33 +1,29 @@
-import { Fragment, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Image from 'next/image'
 import { BigNumber, ethers, utils } from 'ethers'
 import { useEnsName } from 'wagmi'
 
-import {
-  useCurrentAuctionInfo,
-  useContractInfo,
-  useTokenInfo,
-  useTheme,
-} from 'hooks'
+import { useTokenInfo, useTheme } from 'hooks'
 import { usePreviousAuctions } from '@/hooks/fetch/usePreviousAuctions'
-import { AuctionInfo } from '@/services/auction'
+import { AuctionInfo, Bid } from '@/services/auction'
 import { ContractInfo } from '@/services/token'
-import { compareAddress } from '@/utils/compareAddress'
 import { shortenAddress } from '@/utils/shortenAddress'
 
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/20/solid'
 import { CountdownDisplay } from '../CountdownDisplay'
 import { SettleAuction } from './SettleAuction'
 import { PlaceBid } from './PlaceBid'
-import { HighestBidder } from './HighestBidder'
+import { Bidder } from './Bidder'
 import UserAvatar from '../UserAvatar'
 
-export default function Hero() {
-  const { data: contractInfo } = useContractInfo()
-  const { data: auctionInfo } = useCurrentAuctionInfo({
-    auctionContract: contractInfo?.auction,
-  })
+export default function Hero({
+  contractInfo,
+  auctionInfo,
+}: {
+  contractInfo: ContractInfo
+  auctionInfo: AuctionInfo
+}) {
   const { query, push } = useRouter()
 
   const currentTokenId = auctionInfo ? auctionInfo?.tokenId : ''
@@ -135,13 +131,11 @@ const EndedAuction = ({
   owner,
 }: {
   auctionContract?: string
-  tokenId?: string
+  tokenId?: string | number
   owner?: `0x${string}`
 }) => {
   const { data } = usePreviousAuctions({ auctionContract })
-  const auctionData = data?.find(auction =>
-    compareAddress(auction.tokenId, tokenId || '')
-  )
+  const auctionData = data?.find(auction => auction.tokenId == tokenId || '')
 
   const { data: ensName } = useEnsName({
     address: owner,
@@ -186,12 +180,12 @@ const CurrentAuction = ({
 }: {
   auctionInfo?: AuctionInfo
   contractInfo?: ContractInfo
-  tokenId: string
+  tokenId: string | number
 }) => {
   const [theme] = useTheme()
 
   return (
-    <Fragment>
+    <>
       <div className="grid grid-cols-2 gap-12 mt-10 sm:w-96">
         <div className="border-r border-skin-stroke">
           <div className="text-lg text-skin-muted">
@@ -225,11 +219,17 @@ const CurrentAuction = ({
         />
       )}
 
-      {auctionInfo?.highestBidder &&
-        !compareAddress(
-          auctionInfo?.highestBidder,
-          ethers.constants.AddressZero
-        ) && <HighestBidder address={auctionInfo?.highestBidder} />}
-    </Fragment>
+      {auctionInfo && auctionInfo.bids.length > 0
+        ? auctionInfo.bids
+            .map(bid => (
+              <Bidder
+                key={`${bid.tokenId}-${bid.amount}`}
+                address={bid.bidder}
+                amount={bid.amount}
+              />
+            ))
+            .reverse()
+        : 'no bids'}
+    </>
   )
 }

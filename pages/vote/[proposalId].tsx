@@ -31,28 +31,22 @@ interface VoteTally {
 
 // sorts array of Votes by FOR, AGAINST and ABSTAINED
 const tallyVotes = (votes: Vote[]): VoteTally => {
-  const votedFor = []
-  const votedAgainst = []
-  const abstained = []
-
-  for (const vote of votes) {
-    switch (vote.support) {
-      case 1: // for
-        votedFor.push(vote)
-        break
-      case 2: // abstained
-        abstained.push(vote)
-        break
-      default: // against
-        votedAgainst.push(vote)
-    }
-  }
-
-  return {
-    votedFor,
-    votedAgainst,
-    abstained,
-  }
+  return votes.reduce(
+    (tally: VoteTally, vote) => {
+      switch (vote.support) {
+        case 1: // for
+          tally.votedFor.push(vote)
+          break
+        case 2: // abstained
+          tally.abstained.push(vote)
+          break
+        default: // against
+          tally.votedAgainst.push(vote)
+      }
+      return tally
+    },
+    { votedFor: [], votedAgainst: [], abstained: [] }
+  )
 }
 
 export default function ProposalPage() {
@@ -364,7 +358,7 @@ function Voter({ vote }: { vote: Vote }) {
       </ul>
       {vote.reason && (
         <button
-          className={`border border-${borderColor}-500 rounded px-2 py-1 mt-2`}
+          className={`border border-gray-400 rounded px-2 py-1 mt-2`}
           onClick={() => setShowReason(prev => !prev)}>
           {showReason ? '⬆️ hide reason' : '⬇️ show reason'}
         </button>

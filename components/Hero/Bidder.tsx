@@ -1,19 +1,24 @@
-import { Fragment } from "react";
-import { useEnsName } from "wagmi";
-import { useTheme } from "@/hooks/useTheme";
-import { shortenAddress } from "@/utils/shortenAddress";
-import UserAvatar from "../UserAvatar";
+import { BigNumber } from 'ethers'
+import { useEnsName } from 'wagmi'
+import { shortenAddress } from '@/utils/shortenAddress'
+import { formatTreasuryBalance } from '@/utils/formatTreasuryBalance'
+import UserAvatar from '../UserAvatar'
 
-export const HighestBidder = ({ address }: { address?: `0x${string}` }) => {
-  const { data: ensName } = useEnsName({ address });
-  const [theme] = useTheme();
+export const Bidder = ({
+  address,
+  amount,
+}: {
+  address?: `0x${string}`
+  amount: string
+}) => {
+  const { data: ensName } = useEnsName({ address })
 
-  if (!address) return <Fragment />;
+  if (!address) return <></>
 
   return (
     <div className="flex items-center justify-between w-full mt-6 sm:border-b border-skin-stroke pb-4">
       <div className="text-skin-muted">
-        {theme.strings.highestBidder || "Highest Bidder"}
+        {formatTreasuryBalance(BigNumber.from(amount)) || 'N/A'}
       </div>
 
       <div className="flex items-center">
@@ -25,5 +30,5 @@ export const HighestBidder = ({ address }: { address?: `0x${string}` }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
