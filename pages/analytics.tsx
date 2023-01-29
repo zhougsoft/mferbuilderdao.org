@@ -24,7 +24,7 @@ export default function AnalyticsPage({
           <Header />
         </div>
       </div>
-      <div className="max-w-[1400px] w-full">
+      <div className="max-w-[1400px] w-full space-y-12">
         <GovernanceAnalytics/>
         <HoldersAnalytics/>
         <TreasuryAnalytics/>
