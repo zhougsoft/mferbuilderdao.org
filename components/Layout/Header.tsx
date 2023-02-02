@@ -64,7 +64,7 @@ export default function Header() {
           </Link>
         </div>
 
-        <div className="items-center hidden sm:flex">
+        <div className="items-center hidden lg:flex">
           {theme.nav.primary.map((item, i) => (
             <NavigationItemsComponent
               key={i}
@@ -75,7 +75,7 @@ export default function Header() {
           <CustomConnectButton className="bg-skin-backdrop px-6 h-10 rounded-xl border border-skin-stroke text-skin-base transition ease-in-out hover:scale-110" />
         </div>
 
-        <button onClick={() => setShowMobile((x) => !x)} className="sm:hidden">
+        <button onClick={() => setShowMobile((x) => !x)} className="lg:hidden">
           <Bars3Icon className="h-10 py-1 px-3 text-skin-muted rounded-xl border border-skin-stroke focus:outline-none" />
         </button>
       </div>
