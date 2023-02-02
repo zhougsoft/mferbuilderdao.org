@@ -18,7 +18,7 @@ module.exports = {
   theme: {
     extend: {
       width: {
-        '98': '25rem',
+        '98': '20rem',
         '110':'50rem'
       },
       colors: {
